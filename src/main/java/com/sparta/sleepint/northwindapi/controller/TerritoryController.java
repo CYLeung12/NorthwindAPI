@@ -8,6 +8,7 @@ import com.sparta.sleepint.northwindapi.repositories.TerritoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilderDsl;
 import org.springframework.http.ResponseEntity;
@@ -15,25 +16,37 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.security.cert.CertPath;
+import java.util.*;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 public class TerritoryController {
     private final TerritoryRepository territoryRepository;
+    private final EmployeeRepository employeeRepository;
 
     @Autowired
-    public TerritoryController(TerritoryRepository territoryRepository) {
+    public TerritoryController(TerritoryRepository territoryRepository, EmployeeRepository employeeRepository) {
         this.territoryRepository = territoryRepository;
+        this.employeeRepository = employeeRepository;
     }
+
+
     @GetMapping("/territory/employees/{territoryId}")
     public Set<Employee> getEmployeesByTerritoryId(@PathVariable String territoryId){
-        Set<Employee> employeeSet = territoryRepository.findById(territoryId).get().getEmployees();
+        List<Employee> employees = employeeRepository.findAll();
+        Set<Employee> employeeSet = new HashSet<>();
 
-
+        for (Employee employee : employees){
+            Set<Territory> territoriesResponsible = employee.getTerritories();
+            for (Territory territory : territoriesResponsible){
+                if ((territory.getId().equals(territoryId))) {
+                    employeeSet.add(employee);
+                    break;
+                }
+            }
+        }
         return employeeSet;
     }
 
@@ -47,16 +60,44 @@ public class TerritoryController {
         return entityModel;
     }
 
+
+    // Collection is used to create a wrapper for a collection of entities
     @GetMapping("/territory/all")
-    public CollectionModel<List<Territory>> getAllTerritories() {
+    public CollectionModel<EntityModel<Territory>> getAllTerritories() {
         List<Territory> territories = territoryRepository.findAll();
-        CollectionModel <List<Territory>> entityModel = CollectionModel.of(Collections.singleton(territories));
-        //Connect list of all territories to their employees
+        List<EntityModel<Territory>> result = new ArrayList<>();
+
         for(Territory territory : territories) {
             WebMvcLinkBuilder webMvcLinkBuilder = WebMvcLinkBuilder.linkTo(methodOn(this.getClass()).getEmployeesByTerritoryId(territory.getId()));
-            entityModel.add(webMvcLinkBuilder.withRel("employees"));
+            Link link = webMvcLinkBuilder.withRel("employees");
+            EntityModel<Territory> entityModel = EntityModel.of(territory);
+            entityModel.add(link);
+            result.add(entityModel);
         }
-        return entityModel;
+        CollectionModel<EntityModel<Territory>> collectionModel = CollectionModel.of(result);
+        return collectionModel;
     }
+
+//// Return a List of EntityModel<Territory>
+//    @GetMapping("/territory/all")
+//    public List<EntityModel<Territory>> getAllTerritories() {
+//        List<Territory> territories = territoryRepository.findAll();
+//        //CollectionModel<Territory> collectionModel = null;
+//        List<EntityModel<Territory>> result = new ArrayList<>();
+//
+//
+//        for(Territory territory : territories) {
+//            WebMvcLinkBuilder webMvcLinkBuilder = WebMvcLinkBuilder.linkTo(methodOn(this.getClass()).getEmployeesByTerritoryId(territory.getId()));
+//            Link link = webMvcLinkBuilder.withRel("employees");
+//
+//            EntityModel<Territory> entityModel = EntityModel.of(territory);
+//            entityModel.add(link);
+//            result.add(entityModel);
+//
+//        }
+//        return result;
+//    }
+
+
 
 }

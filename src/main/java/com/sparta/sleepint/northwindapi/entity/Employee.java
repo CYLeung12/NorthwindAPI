@@ -2,6 +2,8 @@ package com.sparta.sleepint.northwindapi.entity;
 
 import javax.persistence.*;
 import java.time.Instant;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "employees")
@@ -66,6 +68,20 @@ public class Employee {
 
     @Column(name = "Salary")
     private Float salary;
+
+    @ManyToMany
+    @JoinTable(name = "EmployeeTerritories",
+            joinColumns = @JoinColumn(name = "EmployeeID"),
+            inverseJoinColumns = @JoinColumn(name = "TerritoryID"))
+    private Set<Territory> territories = new LinkedHashSet<>();
+
+    public Set<Territory> getTerritories() {
+        return territories;
+    }
+
+    public void setTerritories(Set<Territory> territories) {
+        this.territories = territories;
+    }
 
     public Integer getId() {
         return id;
