@@ -45,6 +45,7 @@ public class Product implements Serializable {
     @JoinColumn(name = "CategoryID")
     private Category categoryID;
 
+
     public Category getCategoryID() {
         return categoryID;
     }
@@ -125,4 +126,19 @@ public class Product implements Serializable {
         this.discontinued = discontinued;
     }
 
+    @Override
+    public String toString() {
+        return "Product{" +
+                "id=" + id +
+                ", productName='" + productName + '\'' +
+                ", quantityPerUnit='" + quantityPerUnit + '\'' +
+                ", unitPrice=" + unitPrice +
+                ", unitsInStock=" + unitsInStock +
+                ", unitsOnOrder=" + unitsOnOrder +
+                ", reorderLevel=" + reorderLevel +
+                ", discontinued=" + discontinued +
+                ", supplierID=" + supplierID +
+                ", categoryID=" + categoryID +
+                '}';
+    }
 }
