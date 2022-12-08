@@ -36,6 +36,11 @@ public class ProductPriceController {
         return productRepository.findAll();
    }
 
+   @GetMapping("product/{id}")
+   public Product getProductbyId(@PathVariable Integer id){
+        return productRepository.findById(id).get();
+        }
+
     @PatchMapping(value = "product/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> updatePrice(@PathVariable Integer id, @RequestParam BigDecimal unitPrice) {
         ResponseEntity<String> response;

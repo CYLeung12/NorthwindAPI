@@ -1,4 +1,4 @@
-package com.sparta.sleepint.northwindapi.integration_test;
+package com.sparta.sleepint.northwindapi.unit_test;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
